@@ -1,13 +1,11 @@
 import os
 import ptbot
-import random
 
 from dotenv import load_dotenv
 from pytimeparse import parse
 
 
-load_dotenv()
-
+ENV_LOADER = load_dotenv()
 TG_TOKEN = os.getenv('TELEGRAM_TOKEN')
 TG_ID = os.getenv('TG_CHAT_ID')
 START_TIMER = "Запускаю таймер..."
