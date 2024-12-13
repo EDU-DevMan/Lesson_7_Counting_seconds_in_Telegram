@@ -1,13 +1,12 @@
 import os
 import ptbot
 
-from dotenv import load_dotenv
+from decouple import config
 from pytimeparse import parse
 
 
-ENV_LOADER = load_dotenv()
-TG_TOKEN = os.getenv('TELEGRAM_TOKEN')
-TG_ID = os.getenv('TG_CHAT_ID')
+TG_TOKEN = config('TELEGRAM_TOKEN')
+TG_ID = config('TG_CHAT_ID')
 START_TIMER = "Запускаю таймер..."
 STOP_TIMER = "Время вышло!"
 
