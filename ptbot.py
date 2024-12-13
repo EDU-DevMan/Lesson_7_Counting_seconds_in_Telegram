@@ -29,55 +29,45 @@ class Bot():
         return self.bot.send_message(chat_id=chat_id, text=message).message_id
 
     def update_message(self, chat_id, message_id, new_message):
-        self.logger.debug(f'Update message {message_id}: {new_message}')
         self.bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=new_message)
+        self.logger.debug(f'Update message {message_id}: {new_message}')
 
     def create_timer(self, timeout_secs, callback, *args, **kwargs):
         if not callable(callback):
             raise TypeError('Ожидаем функцию на вход')
         if not timeout_secs:
             raise TypeError("Не могу запустить таймер на None секунд")
-        if args:
-            raise TypeError(f"create_timer() takes 2 positional arguments but {len(args) + 2} were given")
-
+        
         def wrapper(context):
-            callback(**kwargs)
+            callback(*args, **kwargs)
 
         self.job_queue.run_once(wrapper, timeout_secs)
 
-    def create_countdown(self, timeout_secs, callback, *args, **kwargs):
+    def create_countdown(self, timeout_secs, callback,*args, **kwargs):
         if not callable(callback):
             raise TypeError('Ожидаем функцию на вход')
         if not timeout_secs:
             raise TypeError("Не могу запустить таймер на None секунд")
-        if args:
-            raise TypeError(f"create_countdown() takes 2 positional arguments but {len(args) + 2} were given")
-
+        
         def wrapper(context):
             job = context.job
             job.context -= 1
-            try:
-                callback(job.context, **kwargs)
-            except Exception as error:
-                traceback.print_exception(type(error), error, error.__traceback__, file=sys.stderr, limit=-3)
-                job.schedule_removal()
+            callback(context.job.context, *args, **kwargs) 
             if job.context <= 0:
                 job.schedule_removal()
 
         first_callback = lambda context: callback(timeout_secs, **kwargs)
+
         self.job_queue.run_once(first_callback, 0)
         self.job_queue.run_repeating(wrapper, 1, context=timeout_secs)
 
     def reply_on_message(self, callback, *args, **kwargs):
         if not callable(callback):
             raise TypeError('Ожидаем функцию на вход')
-        if args:
-            raise TypeError(f"reply_on_message() takes 1 positional argument but {len(args) + 1} were given")
 
         def handle_text(update, context):
             users_reply = update.message.text
-            chat_id = update.message.chat_id
-            callback(chat_id, users_reply, **kwargs)
+            callback(users_reply, *args, **kwargs)
 
         self.dispatcher.add_handler(MessageHandler(Filters.text, handle_text))
 

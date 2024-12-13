@@ -23,7 +23,18 @@ def render_progressbar(
     return '{0} |{1}| {2}% {3}'.format(prefix, pbar, percent, suffix)
 
 
-def notify_progress(secs_left, chat_id, message_id, timer):
+def reply(text, bot):
+
+    message = bot.send_message(TG_ID, START_TIMER)
+    pars_timer = parse(text)
+    bot.create_countdown(
+        pars_timer, notify_progress,
+        chat_id=TG_ID, message_id=message, timer=pars_timer, bot=bot)
+
+    bot.create_timer(parse(text), notify_timer, chat_id=TG_ID, bot=bot)
+
+
+def notify_progress(secs_left, chat_id, message_id, timer, bot):
     bot.update_message(
         chat_id, message_id,
         "Осталось {} секунд!\n {}".format(
@@ -31,21 +42,15 @@ def notify_progress(secs_left, chat_id, message_id, timer):
             render_progressbar(timer, timer-secs_left)))
 
 
-def notify_timer(chat_id):
+def notify_timer(chat_id, bot):
     bot.send_message(chat_id, STOP_TIMER)
 
 
-def main(chat_id, text):
-    message = bot.send_message(TG_ID, START_TIMER)
-    pars_timer = parse(text)
-    bot.create_countdown(
-        pars_timer, notify_progress,
-        chat_id=TG_ID, message_id=message, timer=pars_timer)
-
-    bot.create_timer(parse(text), notify_timer, chat_id=TG_ID)
+def main():
+    bot = ptbot.Bot(TG_TOKEN)
+    bot.reply_on_message(reply, bot)
+    bot.run_bot()
 
 
 if __name__ == '__main__':
-    bot = ptbot.Bot(TG_TOKEN)
-    bot.reply_on_message(main)
-    bot.run_bot()
+    main()
