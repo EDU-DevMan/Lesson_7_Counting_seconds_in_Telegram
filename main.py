@@ -23,7 +23,6 @@ def render_progressbar(
 
 
 def reply(text, bot):
-
     message = bot.send_message(TG_ID, START_TIMER)
     pars_timer = parse(text)
     bot.create_countdown(
