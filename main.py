@@ -1,4 +1,3 @@
-import os
 import ptbot
 
 from decouple import config
